@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sight Word Safari</title>
+  <style>
+    body {
+      font-family: 'Comic Sans MS', sans-serif;
+      text-align: center;
+      background-color: #e6ccff; /* light purple */
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      font-size: 3em;
+      color: #6a1b9a;
+    }
+    #tapArea {
+      font-size: 1.5em;
+      color: #4a148c;
+      margin: 20px 0;
+      cursor: pointer;
+    }
+    .choices {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-top: 30px;
+    }
+    .choice {
+      font-size: 2em;
+      padding: 20px 30px;
+      border: 3px solid #7e57c2;
+      border-radius: 10px;
+      background: #f3e5f5;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .choice:hover {
+      background: #ce93d8;
+    }
+    #message {
+      font-size: 2em;
+      margin-top: 20px;
+      color: #388e3c;
+    }
+    #scoreboard {
+      font-size: 1.2em;
+      margin-top: 20px;
+      color: #333;
+    }
+    button {
+      margin-top: 40px;
+      font-size: 1.3em;
+      padding: 10px 20px;
+      background: #ffccbc;
+      border: 3px solid #ff7043;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>🐘 Sight Word Safari 🐒</h1>
+  <div id="tapArea" onclick="speak(currentWord)">🔊 Tap here to hear the word</div>
+  <div class="choices" id="choices"></div>
+  <div id="message"></div>
+  <div id="scoreboard">✅ Correct: 0 | ❌ Incorrect: 0</div>
+  <button onclick="newRound()">Next Word</button>
+
+  <script>
+    const words = ['the', 'and', 'said', 'come', 'look', 'here', 'we', 'to', 'go', 'you'];
+    let currentWord = '';
+    let correctCount = 0;
+    let incorrectCount = 0;
+
+    function speak(text) {
+      const msg = new SpeechSynthesisUtterance(text);
+      window.speechSynthesis.speak(msg);
+    }
+
+    function shuffle(array) {
+      return array.sort(() => 0.5 - Math.random());
+    }
+
+    function newRound() {
+      document.getElementById('message').textContent = '';
+      currentWord = words[Math.floor(Math.random() * words.length)];
+      speak(currentWord);
+
+      // Generate 2 wrong choices
+      const wrongChoices = shuffle(words.filter(w => w !== currentWord)).slice(0, 2);
+      const finalChoices = shuffle([currentWord, ...wrongChoices]);
+
+      const choiceBox = document.getElementById('choices');
+      choiceBox.innerHTML = '';
+      finalChoices.forEach(word => {
+        const btn = document.createElement('div');
+        btn.className = 'choice';
+        btn.textContent = word;
+        btn.onclick = () => {
+          if (word === currentWord) {
+            correctCount++;
+            document.getElementById('message').textContent = '✅ That’s right!';
+          } else {
+            incorrectCount++;
+            document.getElementById('message').textContent = '❌ Try again!';
+          }
+          updateScore();
+        };
+        choiceBox.appendChild(btn);
+      });
+    }
+
+    function updateScore() {
+      document.getElementById('scoreboard').textContent =
+        `✅ Correct: ${correctCount} | ❌ Incorrect: ${incorrectCount}`;
+    }
+
+    window.onload = newRound;
+  </script>
+</body>
+</html>
