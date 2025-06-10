@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sight Word Safari</title>
+  <style>
+    body {
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      text-align: center;
+      background-color: #e6ccff; /* light purple */
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      font-size: 3em;
+      color: #6a1b9a;
+    }
+    #tapArea {
+      font-size: 1.5em;
+      color: #4a148c;
+      margin: 20px 0;
+      cursor: pointer;
+    }
+    .choices {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-top: 30px;
+    }
+    .choice {
+      font-size: 2em;
+      padding: 20px 30px;
+      border: 3px solid #7e57c2;
+      border-radius: 10px;
+      background: #f3e5f5;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .choice:hover {
+      background: #ce93d8;
+    }
+    #message {
+      font-size: 2em;
+      margin-top: 20px;
+      color: #388e3c;
+    }
+    button {
+      margin-top: 40px;
+      font-size: 1.3em;
+      padding: 10px 20px;
+      background: #ffccbc;
+      border: 3px solid #ff7043;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>🐘 Sight Word Safari 🐒</h1>
+  <div id="tapArea" onclick="speak(currentWord)">🔊 Tap here to hear the word</div>
+  <div class="choices" id="choices"></div>
+  <div id="message"></div>
+  <button onclick="newRound()">Next Word</button>
+
+  <script>
+    const words = ['the', 'and', 'said', 'come', 'look', 'here', 'we', 'to', 'go', 'you'];
+    let currentWord = '';
+
+    function speak(text) {
+      const msg = new SpeechSynthesisUtterance(text);
+      window.speechSynthesis.speak(msg);
+    }
+
+    function shuffle(array) {
+      return array.sort(() => 0.5 - Math.random());
+    }
+
+    function newRound() {
+      document.getElementById('message').textContent = '';
+      currentWord = words[Math.floor(Math.random() * words.length)];
+      speak(currentWord);
+
+      const shuffled = shuffle([...words]);
+      const choices = shuffled.slice(0, 2);
+      if (!choices.includes(currentWord)) {
+        choices[Math.floor(Math.random() * 2)] = currentWord;
+      }
+      choices.push(currentWord); // ensure it's there, then shuffle again
+      const finalChoices = shuffle(choices);
+
+      const choiceBox = document.getElementById('choices');
+      choiceBox.innerHTML = '';
+      finalChoices.forEach(word => {
+        const btn = document.createElement('div');
+        btn.className = 'choice';
+        btn.textContent = word;
+        btn.onclick = () => {
+          if (word === currentWord) {
+            document.getElementById('message').textContent = '🎉 Great job!';
+            confetti();
+          } else {
+            document.getElementById('message').textContent = '❌ Try again!';
+          }
+        };
+        choiceBox.appendChild(btn);
+      });
+    }
+
+    window.onload = newRound;
+
+    function confetti() {
+      const duration = 1000;
+      const end = Date.now() + duration;
+      (function frame() {
+        confettiEffect();
+        if (Date.now() < end) requestAnimationFrame(frame);
+      })();
+    }
+
+    function confettiEffect() {
+      const particle = document.createElement('div');
+      particle.textContent = '🎉';
+      particle.style.position = 'fixed';
+      particle.style.left = Math.random() * 100 + '%';
+      particle.style.top = '-2em';
+      particle.style.fontSize = '2em';
+      particle.style.zIndex = '9999';
+      document.body.appendChild(particle);
+
+      let top = -40;
+      const interval = setInterval(() => {
+        if (top > window.innerHeight) {
+          clearInterval(interval);
+          particle.remove();
+        } else {
+          top += 5;
+          particle.style.top = top + 'px';
+        }
+      }, 30);
+    }
+  </script>
+</body>
+</html>
