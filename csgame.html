@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sight Word Safari</title>
+  <style>
+    body {
+      font-family: 'Comic Sans MS', sans-serif;
+      text-align: center;
+      background-color: #e6ccff;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      font-size: 3em;
+      color: #6a1b9a;
+    }
+    #tapArea {
+      font-size: 1.5em;
+      color: #4a148c;
+      margin: 20px 0;
+      cursor: pointer;
+    }
+    .choices {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-top: 30px;
+    }
+    .choice {
+      font-size: 2em;
+      padding: 20px 30px;
+      border: 3px solid #7e57c2;
+      border-radius: 10px;
+      background: #f3e5f5;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .choice:hover {
+      background: #ce93d8;
+    }
+    #message {
+      font-size: 2em;
+      margin-top: 20px;
+      color: #388e3c;
+    }
+    #scoreboard {
+      font-size: 1.2em;
+      margin-top: 20px;
+      color: #333;
+    }
+    button, select {
+      margin-top: 30px;
+      font-size: 1.3em;
+      padding: 10px 20px;
+      background: #ffccbc;
+      border: 3px solid #ff7043;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    select {
+      margin-left: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🐘 Sight Word Safari 🐒</h1>
+  <div>
+    <label for="level">Choose Level:</label>
+    <select id="level" onchange="changeLevel()">
+      <option value="1">Level 1</option>
+      <option value="2">Level 2</option>
+      <option value="3">Level 3</option>
+    </select>
+  </div>
+  <div id="tapArea" onclick="speak(currentWord)">🔊 Tap here to hear the word</div>
+  <div class="choices" id="choices"></div>
+  <div id="message"></div>
+  <div id="scoreboard">✅ Correct: 0 | ❌ Incorrect: 0</div>
+  <button onclick="newRound()">Next Word</button>
+
+  <script>
+    const fry1_20 = ['the', 'of', 'and', 'a', 'to', 'in', 'is', 'you', 'that', 'it', 'he', 'was', 'for', 'on', 'are', 'as', 'with', 'his', 'they', 'I'];
+    const fry1_40 = [...fry1_20, 'at', 'be', 'this', 'have', 'from', 'or', 'one', 'had', 'by', 'word', 'but', 'not', 'what', 'all', 'were', 'we', 'when', 'your', 'can'];
+    const cvcWords = ['cat', 'dog', 'pet', 'pig', 'big', 'bat', 'mat', 'sat', 'fat', 'wig', 'log', 'tap', 'lap', 'map', 'nap', 'zap', 'can', 'fan', 'man', 'pan'];
+
+    let currentList = [...fry1_20];
+    let currentWord = '';
+    let correctCount = 0;
+    let incorrectCount = 0;
+
+    function speak(text) {
+      const msg = new SpeechSynthesisUtterance(text);
+      window.speechSynthesis.speak(msg);
+    }
+
+    function shuffle(array) {
+      return array.sort(() => 0.5 - Math.random());
+    }
+
+    function changeLevel() {
+      const level = document.getElementById('level').value;
+      if (level === '1') currentList = [...fry1_20];
+      else if (level === '2') currentList = [...fry1_40];
+      else if (level === '3') currentList = [...cvcWords];
+      newRound();
+    }
+
+    function newRound() {
+      document.getElementById('message').textContent = '';
+      currentWord = currentList[Math.floor(Math.random() * currentList.length)];
+      speak(currentWord);
+
+      // Generate 2 wrong choices
+      const wrongChoices = shuffle(currentList.filter(w => w !== currentWord)).slice(0, 2);
+      const finalChoices = shuffle([currentWord, ...wrongChoices]);
+
+      const choiceBox = document.getElementById('choices');
+      choiceBox.innerHTML = '';
+      finalChoices.forEach(word => {
+        const btn = document.createElement('div');
+        btn.className = 'choice';
+        btn.textContent = word;
+        btn.onclick = () => {
+          if (word === currentWord) {
+            correctCount++;
+            document.getElementById('message').textContent = '✅ That’s right!';
+          } else {
+            incorrectCount++;
+            document.getElementById('message').textContent = '❌ Try again!';
+          }
+          updateScore();
+        };
+        choiceBox.appendChild(btn);
+      });
+    }
+
+    function updateScore() {
+      document.getElementById('scoreboard').textContent =
+        `✅ Correct: ${correctCount} | ❌ Incorrect: ${incorrectCount}`;
+    }
+
+    window.onload = newRound;
+  </script>
+</body>
+</html>
