@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sight Word Safari</title>
+  <style>
+    body {
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      text-align: center;
+      background: #DFF7FF url('https://i.imgur.com/LkY2YV1.png') no-repeat center top;
+      background-size: cover;
+    }
+    h1 {
+      font-size: 3em;
+      color: #2E8B57;
+      margin-top: 30px;
+    }
+    #wordBox {
+      font-size: 4em;
+      margin: 30px auto;
+      padding: 20px;
+      background: #fff9c4;
+      width: 60%;
+      border-radius: 20px;
+      border: 4px solid #fbc02d;
+    }
+    .choices {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .choice {
+      font-size: 2em;
+      padding: 20px;
+      border: 4px solid #0288d1;
+      border-radius: 10px;
+      background: #b3e5fc;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .choice:hover {
+      background: #4fc3f7;
+    }
+    #message {
+      font-size: 2em;
+      margin-top: 20px;
+      color: #4caf50;
+    }
+    button {
+      margin-top: 30px;
+      font-size: 1.5em;
+      padding: 10px 20px;
+      background: #ffcc80;
+      border: 3px solid #fb8c00;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>🐘 Sight Word Safari 🐒</h1>
+  <div id="wordBox">Click to Hear</div>
+  <div class="choices" id="choices"></div>
+  <div id="message"></div>
+  <button onclick="newRound()">Next Word</button>
+
+  <script>
+    const words = ['the', 'and', 'said', 'come', 'look', 'here', 'we', 'to', 'go', 'you'];
+    let currentWord = '';
+
+    function speak(text) {
+      const msg = new SpeechSynthesisUtterance(text);
+      window.speechSynthesis.speak(msg);
+    }
+
+    function shuffle(array) {
+      return array.sort(() => 0.5 - Math.random());
+    }
+
+    function newRound() {
+      document.getElementById('message').textContent = '';
+      const wordBox = document.getElementById('wordBox');
+      currentWord = words[Math.floor(Math.random() * words.length)];
+      wordBox.textContent = currentWord;
+      speak(currentWord);
+
+      const shuffled = shuffle([...words]);
+      const choices = shuffled.slice(0, 3);
+      if (!choices.includes(currentWord)) {
+        choices[Math.floor(Math.random() * 3)] = currentWord;
+      }
+
+      const choiceBox = document.getElementById('choices');
+      choiceBox.innerHTML = '';
+      choices.forEach(word => {
+        const btn = document.createElement('div');
+        btn.className = 'choice';
+        btn.textContent = word;
+        btn.onclick = () => {
+          if (word === currentWord) {
+            document.getElementById('message').textContent = '🎉 Great job!';
+            confetti();
+          } else {
+            document.getElementById('message').textContent = '❌ Try again!';
+          }
+        };
+        choiceBox.appendChild(btn);
+      });
+    }
+
+    document.getElementById('wordBox').onclick = () => speak(currentWord);
+    window.onload = newRound;
+
+    function confetti() {
+      const duration = 1 * 1000;
+      const end = Date.now() + duration;
+      (function frame() {
+        confettiEffect();
+        if (Date.now() < end) requestAnimationFrame(frame);
+      })();
+    }
+
+    function confettiEffect() {
+      const colors = ['#f44336', '#ffeb3b', '#4caf50', '#2196f3', '#ff9800'];
+      const particle = document.createElement('div');
+      particle.textContent = '🎊';
+      particle.style.position = 'fixed';
+      particle.style.left = Math.random() * 100 + '%';
+      particle.style.top = '-2em';
+      particle.style.fontSize = '2em';
+      particle.style.zIndex = '9999';
+      document.body.appendChild(particle);
+
+      const fall = () => {
+        let top = -40;
+        const interval = setInterval(() => {
+          if (top > window.innerHeight) {
+            clearInterval(interval);
+            particle.remove();
+          } else {
+            top += 5;
+            particle.style.top = top + 'px';
+          }
+        }, 30);
+      };
+      fall();
+    }
+  </script>
+</body>
+</html>
